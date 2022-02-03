@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -82,6 +83,11 @@ func main() {
 			}
 
 			_, _, err := client.Teams.AddTeamMembershipBySlug(ctx, "neotoolkit", "team", userName, &github.TeamAddTeamMembershipOptions{})
+			if err != nil {
+				log.Fatalln(err)
+			}
+
+			_, err = http.Get("https://api.telegram.org/bot" + os.Getenv("TELEGRAM_ACCESS_TOKEN") + "/sendMessage?chat_id=@neotoolkit&text=send invite to " + userName)
 			if err != nil {
 				log.Fatalln(err)
 			}
