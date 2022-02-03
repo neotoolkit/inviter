@@ -19,4 +19,4 @@ jobs:
         env:
           INVITER_GITHUB_ACCESS_TOKEN: ${{ secrets.INVITER_GITHUB_ACCESS_TOKEN }}
         run: |
-          go run cmd/inviter
+          go run ./cmd/inviter
