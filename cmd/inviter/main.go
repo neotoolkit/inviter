@@ -30,6 +30,17 @@ func main() {
 		}
 	}
 
+	_, _, err = client.Repositories.ListByOrg(ctx, "neotoolkit", &github.RepositoryListByOrgOptions{
+		Sort:      "updated",
+		Direction: "desc",
+		ListOptions: github.ListOptions{
+			PerPage: 10,
+		},
+	})
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	_, _, err = client.Teams.AddTeamMembershipBySlug(ctx, "neotoolkit", "team", "neotoolkit-bot", &github.TeamAddTeamMembershipOptions{})
 	if err != nil {
 		log.Fatalln(err)
