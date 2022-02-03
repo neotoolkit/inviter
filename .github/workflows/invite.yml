@@ -1,7 +1,7 @@
 name: invite
 on:
   schedule:
-    - cron: '50 19 * * *'
+    - cron: '00 20 * * *'
 
 jobs:
   invite:
