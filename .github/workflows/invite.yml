@@ -14,5 +14,6 @@ jobs:
       - name: Invite
         env:
           INVITER_GITHUB_ACCESS_TOKEN: ${{ secrets.INVITER_GITHUB_ACCESS_TOKEN }}
+          TELEGRAM_ACCESS_TOKEN: ${{ secrets.TELEGRAM_ACCESS_TOKEN }}
         run: |
           go run ./cmd/inviter
