@@ -17,7 +17,20 @@ func main() {
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 
-	_, _, err := client.Teams.AddTeamMembershipBySlug(ctx, "neotoolkit", "team", "neotoolkit-bot", &github.TeamAddTeamMembershipOptions{})
+	invitationList := make(map[string]struct{})
+
+	invitations, _, err := client.Organizations.ListPendingOrgInvitations(ctx, "neotoolkit", &github.ListOptions{})
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	for _, invitation := range invitations {
+		if invitation.Login != nil {
+			invitationList[*invitation.Login] = struct{}{}
+		}
+	}
+
+	_, _, err = client.Teams.AddTeamMembershipBySlug(ctx, "neotoolkit", "team", "neotoolkit-bot", &github.TeamAddTeamMembershipOptions{})
 	if err != nil {
 		log.Fatalln(err)
 	}
