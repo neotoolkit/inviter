@@ -1,7 +1,7 @@
 name: invite
 on:
   schedule:
-    - cron: '23 * * * *'
+    - cron: '30 * * * *'
   repository_dispatch:
     types: [invite]
   workflow_dispatch:
