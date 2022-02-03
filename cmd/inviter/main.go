@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"time"
 
 	"github.com/google/go-github/v42/github"
 	"golang.org/x/oauth2"
@@ -30,7 +31,7 @@ func main() {
 		}
 	}
 
-	_, _, err = client.Repositories.ListByOrg(ctx, "neotoolkit", &github.RepositoryListByOrgOptions{
+	repos, _, err := client.Repositories.ListByOrg(ctx, "neotoolkit", &github.RepositoryListByOrgOptions{
 		Sort:      "updated",
 		Direction: "desc",
 		ListOptions: github.ListOptions{
@@ -41,8 +42,49 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	_, _, err = client.Teams.AddTeamMembershipBySlug(ctx, "neotoolkit", "team", "neotoolkit-bot", &github.TeamAddTeamMembershipOptions{})
-	if err != nil {
-		log.Fatalln(err)
+	for _, repo := range repos {
+		owner := repo.GetOwner().GetLogin()
+		repoName := repo.GetName()
+
+		pulls, _, err := client.PullRequests.List(ctx, owner, repoName, &github.PullRequestListOptions{
+			State:     "closed",
+			Sort:      "updated",
+			Direction: "desc",
+		})
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		within := 5 * 24 * time.Hour
+
+		for _, pull := range pulls {
+			if pull.MergedAt == nil {
+				continue
+			}
+
+			if closedAgo := time.Since(pull.GetClosedAt()); closedAgo > within {
+				continue
+			}
+
+			if pull.GetUser().GetType() == "Bot" {
+				continue
+			}
+
+			switch pull.GetAuthorAssociation() {
+			case "OWNER", "MEMBER", "COLLABORATOR":
+				continue
+			}
+
+			userName := pull.GetUser().GetLogin()
+
+			if _, ok := invitationList[userName]; ok {
+				continue
+			}
+
+			_, _, err := client.Teams.AddTeamMembershipBySlug(ctx, "neotoolkit", "team", userName, &github.TeamAddTeamMembershipOptions{})
+			if err != nil {
+				log.Fatalln(err)
+			}
+		}
 	}
 }
